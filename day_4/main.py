@@ -24,21 +24,14 @@ def count_overlap():
             assignment_str1, assignment_str2 = line.split(',')
             ass1 = Assignment(assignment_str1)
             ass2 = Assignment(assignment_str2)
-            print(line)
             if ass1.contains(ass2) or ass2.contains(ass1):
                 contain_total += 1
-                print("Yep")
-            else:
-                print("Nope")
             if ass1.overlaps(ass2) or ass2.overlaps(ass1):
                 overlap_total += 1
-                print("Yep")
-            else:
-                print("Nope")
     return contain_total, overlap_total
 
 
-# Execution of Day 3 of Advent of Code
+# Execution of Day 4 of Advent of Code
 if __name__ == '__main__':
     # Execute
     print(count_overlap())
