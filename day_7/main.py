@@ -8,19 +8,9 @@ def process_file():
                 line = line[1:]
                 line = line.strip()
                 if is_cd_command(line):
-                    line = line[2:]
-                    line = line.strip()
-                    dir_name = line
-                    if dir_name == "..":
-                        curr_dir = curr_dir.parent_dir
-                    else:
-                        parent_dir = curr_dir
-                        curr_dir = Directory(dir_name)
-                        if parent_dir is not None:
-                            curr_dir.parent_dir = parent_dir
-                            parent_dir.sub_dirs.append(curr_dir)
-                        else:
-                            top_level_dir = curr_dir
+                    curr_dir = process_cd_line(curr_dir, line)
+                    if curr_dir.parent_dir is None:
+                        top_level_dir = curr_dir
             else:
                 if not is_dir_list_entry(line):
                     size_name_split = line.split(' ')
@@ -28,6 +18,20 @@ def process_file():
                     name = size_name_split[1]
                     curr_dir.files.append(File(name, size))
     return top_level_dir
+
+
+def process_cd_line(curr_dir, line):
+    dir_name = line[2:]
+    dir_name = dir_name.strip()
+    if (dir_name == "..") and (curr_dir.parent_dir is not None):
+        curr_dir = curr_dir.parent_dir
+    else:
+        parent_dir = curr_dir
+        curr_dir = Directory(dir_name)
+        if parent_dir is not None:
+            curr_dir.parent_dir = parent_dir
+            parent_dir.sub_dirs.append(curr_dir)
+    return curr_dir
 
 
 def is_dir_list_entry(line):
