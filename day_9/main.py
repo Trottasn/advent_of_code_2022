@@ -31,7 +31,7 @@ def process():
 def process_action(first_piece, vector, magnitude):
     for _ in range(0, magnitude):
         if vector == 'R':
-            first_piece.x = piece.x + 1
+            process_right(first_piece)
         elif vector == 'L':
             process_left(first_piece)
         elif vector == 'U':
@@ -50,8 +50,6 @@ def process_right(piece):
     if not is_touching(piece, next_piece):
         next_piece.x = piece.x - 1
         next_piece.y = piece.y
-
-    # TODO: compare previous and current positions to find actual direction of child to use in recursion / chain
     process_right(next_piece)
     next_piece.positions.append((next_piece.x, next_piece.y))
 
@@ -88,23 +86,43 @@ def process_down(piece):
     if piece.next is None:
         return
     next_piece = piece.next
+    previous_tuple = (next_piece.x, next_piece.y)
     if piece.is_head:
         piece.y = piece.y - 1
-    piece.positions.append((piece.x, piece.y))
+        piece.positions.append((piece.x, piece.y))
     if not is_touching(piece, next_piece):
         next_piece.x = piece.x
         next_piece.y = piece.y + 1
-    process_down(next_piece)
-    next_piece.positions.append((next_piece.x, next_piece.y))
+        next_piece.positions.append((next_piece.x, next_piece.y))
+    generate_vector(previous_tuple, (next_piece.x, next_piece.y))
 
 
 def is_touching(piece, next_piece):
-    next_piece_tuple = (next_piece.x, next_piece.y)
-    
-    (piece.x, piece.y), (piece.x - 1, piece.y - 1), (piece.x, piece.y - 1), (piece.x + 1, piece.y - 1),
-                          (piece.x - 1, piece.y), (piece.x + 1, piece.y), (piece.x - 1, piece.y + 1), (piece.x, piece.y + 1),
-                          (piece.x + 1, piece.y + 1)]
-    return (next_piece.x, next_piece.y) in touching_positions
+    return generate_vector((next_piece.x, next_piece.y), (piece.x, piece.y)) is not None
+
+
+def generate_vector(previous_tuple, current_tuple):
+    x_diff = previous_tuple[0] - current_tuple[0]
+    y_diff = previous_tuple[1] - current_tuple[1]
+    if (x_diff == 0) and (y_diff == 0):
+        return None
+    if (x_diff == -1) and (y_diff == -1):
+        return "LU"
+    if (x_diff == 0) and (y_diff == -1):
+        return "U"
+    if (x_diff == 1) and (y_diff == -1):
+        return "RU"
+    if (x_diff == -1) and (y_diff == 0):
+        return "L"
+    if (x_diff == 1) and (y_diff == 0):
+        return "R"
+    if (x_diff == -1) and (y_diff == 1):
+        return "LD"
+    if (x_diff == 0) and (y_diff == 1):
+        return "D"
+    if (x_diff == 1) and (y_diff == 1):
+        return "RD"
+    return None
 
 
 if __name__ == "__main__":
