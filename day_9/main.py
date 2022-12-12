@@ -1,136 +1,78 @@
-class RopePiece:
-    def __init__(self, number):
-        self.number = number
-        self.x = 0
-        self.y = 0
-        self.positions = [(0, 0)]
-        self.next = None
-        self.is_head = False
-
-
 def process():
-    with open('input_day_9.txt') as input_file:
-        first_rope = None
-        last_rope = None
-        for x in range(0, 10):
-            new_rope = RopePiece(x)
-            if last_rope is not None:
-                last_rope.next = new_rope
-            else:
-                first_rope = new_rope
-                first_rope.is_head = True
-            last_rope = new_rope
+    with open("input_day_9.txt", mode='r') as input_file:
+        movements = []
         for line in input_file:
-            action_array = line.strip().split(" ")
-            vector = action_array[0]
-            magnitude = action_array[1]
-            process_action(first_rope, vector, int(magnitude))
-    return first_rope, last_rope
+            split = line.strip().split()
+            vector = split[0]
+            magnitude = split[1]
+            movements.append((vector, int(magnitude)))
+
+        vector_map = {'U': [0, 1],
+                      'D': [0, -1],
+                      'L': [-1, 0],
+                      'R': [1, 0]}
+
+        rope = []
+        for _ in range(0, 10):
+            rope.append([[0, 0]])
+
+        for vector, magnitude in movements:
+            for _ in range(magnitude):
+                rope[0].append(get_summation(get_last(rope[0]), vector_map.get(vector)))
+                process_movement(rope, 1)
+
+        unique_positions = set([])
+        for position in rope[-1]:
+            unique_positions.add((position[0], position[1]))
+        print(len(unique_positions))
 
 
-def process_action(first_piece, vector, magnitude):
-    for _ in range(0, magnitude):
-        if vector == 'R':
-            process_right(first_piece)
-        elif vector == 'L':
-            process_left(first_piece)
-        elif vector == 'U':
-            process_up(first_piece)
-        else:
-            process_down(first_piece)
+def get_last(rope):
+    return rope[-1]
 
 
-def process_right(piece):
-    if piece.next is None:
+def process_movement(rope, knot_index):
+    if knot_index == len(rope):
         return
-    next_piece = piece.next
-    if piece.is_head:
-        piece.x = piece.x + 1
-        piece.positions.append((piece.x, piece.y))
-    if not is_touching(piece, next_piece):
-        next_piece.x = piece.x - 1
-        next_piece.y = piece.y
-    process_right(next_piece)
-    next_piece.positions.append((next_piece.x, next_piece.y))
+
+    prev_knot = rope[knot_index - 1]
+    curr_knot = rope[knot_index]
+    latest_prev_knot_position = get_last(prev_knot)
+    latest_curr_knot_position = get_last(curr_knot)
+    x_diff, y_diff = get_difference(latest_prev_knot_position, latest_curr_knot_position)
+
+    xs_equal = get_last(prev_knot)[0] == get_last(curr_knot)[0]
+    ys_equal = get_last(prev_knot)[1] == get_last(curr_knot)[1]
+    within_one = (abs(x_diff) > 1) or (abs(y_diff) > 1)
+    if not xs_equal and not ys_equal and within_one:
+        if x_diff > 0 and y_diff > 0:
+            curr_knot.append(get_summation(get_last(curr_knot), [1, 1]))
+        elif x_diff > 0 and y_diff < 0:
+            curr_knot.append(get_summation(get_last(curr_knot), [1, -1]))
+        elif x_diff < 0 and y_diff > 0:
+            curr_knot.append(get_summation(get_last(curr_knot), [-1, 1]))
+        elif x_diff < 0 and y_diff < 0:
+            curr_knot.append(get_summation(get_last(curr_knot), [-1, -1]))
+    elif within_one:
+        if x_diff > 0:
+            curr_knot.append(get_summation(get_last(curr_knot), [1, 0]))
+        elif x_diff < 0:
+            curr_knot.append(get_summation(get_last(curr_knot), [-1, 0]))
+        elif y_diff > 0:
+            curr_knot.append(get_summation(get_last(curr_knot), [0, 1]))
+        elif y_diff < 0:
+            curr_knot.append(get_summation(get_last(curr_knot), [0, -1]))
+
+    process_movement(rope, knot_index + 1)
 
 
-def process_left(piece):
-    if piece.next is None:
-        return
-    next_piece = piece.next
-    if piece.is_head:
-        piece.x = piece.x - 1
-    piece.positions.append((piece.x, piece.y))
-    if not is_touching(piece, next_piece):
-        next_piece.x = piece.x + 1
-        next_piece.y = piece.y
-    process_left(next_piece)
-    next_piece.positions.append((next_piece.x, next_piece.y))
+def get_difference(second_last, last):
+    return [second_last[0] - last[0], second_last[1] - last[1]]
 
 
-def process_up(piece):
-    if piece.next is None:
-        return
-    next_piece = piece.next
-    if piece.is_head:
-        piece.y = piece.y + 1
-    piece.positions.append((piece.x, piece.y))
-    if not is_touching(piece, next_piece):
-        next_piece.x = piece.x
-        next_piece.y = piece.y - 1
-    process_up(next_piece)
-    next_piece.positions.append((next_piece.x, next_piece.y))
+def get_summation(second_last, last):
+    return [second_last[0] + last[0], second_last[1] + last[1]]
 
 
-def process_down(piece):
-    if piece.next is None:
-        return
-    next_piece = piece.next
-    previous_tuple = (next_piece.x, next_piece.y)
-    if piece.is_head:
-        piece.y = piece.y - 1
-        piece.positions.append((piece.x, piece.y))
-    if not is_touching(piece, next_piece):
-        next_piece.x = piece.x
-        next_piece.y = piece.y + 1
-        next_piece.positions.append((next_piece.x, next_piece.y))
-    generate_vector(previous_tuple, (next_piece.x, next_piece.y))
-
-
-def is_touching(piece, next_piece):
-    return generate_vector((next_piece.x, next_piece.y), (piece.x, piece.y)) is not None
-
-
-def generate_vector(previous_tuple, current_tuple):
-    x_diff = previous_tuple[0] - current_tuple[0]
-    y_diff = previous_tuple[1] - current_tuple[1]
-    if (x_diff == 0) and (y_diff == 0):
-        return None
-    if (x_diff == -1) and (y_diff == -1):
-        return "LU"
-    if (x_diff == 0) and (y_diff == -1):
-        return "U"
-    if (x_diff == 1) and (y_diff == -1):
-        return "RU"
-    if (x_diff == -1) and (y_diff == 0):
-        return "L"
-    if (x_diff == 1) and (y_diff == 0):
-        return "R"
-    if (x_diff == -1) and (y_diff == 1):
-        return "LD"
-    if (x_diff == 0) and (y_diff == 1):
-        return "D"
-    if (x_diff == 1) and (y_diff == 1):
-        return "RD"
-    return None
-
-
-if __name__ == "__main__":
-    head, tail = process()
-    for position in tail.positions:
-        print(position)
-    unique_tail_tuples = []
-    for tail_tuple in tail.positions:
-        if tail_tuple not in unique_tail_tuples:
-            unique_tail_tuples.append(tail_tuple)
-    print(len(unique_tail_tuples))
+if __name__ == '__main__':
+    process()
