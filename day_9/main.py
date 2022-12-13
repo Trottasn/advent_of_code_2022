@@ -7,14 +7,14 @@ def process():
             magnitude = split[1]
             movements.append((vector, int(magnitude)))
 
+        rope = []
+        for _ in range(0, 10):
+            rope.append([[0, 0]])
+
         vector_map = {'U': [0, 1],
                       'D': [0, -1],
                       'L': [-1, 0],
                       'R': [1, 0]}
-
-        rope = []
-        for _ in range(0, 10):
-            rope.append([[0, 0]])
 
         for vector, magnitude in movements:
             for _ in range(magnitude):
