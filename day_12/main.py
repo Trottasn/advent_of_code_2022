@@ -1,6 +1,3 @@
-END_VAL = (ord('z') - ord('a')) + 2
-
-
 class Node:
     def __init__(self, x, y, character, forwards):
         self.id = (x, y)
@@ -11,11 +8,11 @@ class Node:
         self.character = character
         self.f_score = 0
         self.g_score = 0
+        self.weight = 0
         if forwards:
             self.value = gen_value_forwards(character)
         else:
             self.value = gen_value_backwards(character)
-        self.weight = 0
 
     def __lt__(self, other):
         return self.weight > other.weight
@@ -31,16 +28,16 @@ def gen_value_forwards(character):
 
 def gen_value_backwards(character):
     if character == 'S':
-        return END_VAL
+        return ord('z')
     elif character == 'E':
-        return 999999999999
-    return END_VAL - gen_value_forwards(character)
+        return 99999999999
+    return ord('z') - ord(character)
 
 
 def process_grid(forwards):
     val_grid = []
     start_node = None
-    end_node = None
+    end_nodes = []
     with open("input_day_12.txt", mode='r') as input_file:
         y = 0
         for line in input_file:
@@ -51,32 +48,32 @@ def process_grid(forwards):
             for character in line:
                 node = Node(x, y, character, forwards)
                 curr_line_nodes.append(node)
-                if character == 'E':
-                    end_node = node
-                elif character == 'S':
+                if (forwards and node.character == 'E') or ((not forwards) and node.character == 'a'):
+                    end_nodes.append(node)
+                elif (forwards and node.character == 'S') or ((not forwards) and node.character == 'E'):
                     start_node = node
                 x += 1
             y += 1
-    return val_grid, start_node, end_node
+    return val_grid, start_node, end_nodes
 
 
-def a_star(grid, start_node, end_node):
-    start_node.f_score = start_node.g_score = end_node.f_score = end_node.g_score = 0
+def a_star(grid, start_node, end_nodes):
+    start_node.f_score = start_node.g_score = 0
+    for an_end in end_nodes:
+        an_end.f_score = an_end.g_score = 0
     open_list = [start_node]
     closed_list = []
     while len(open_list) > 0:
         current_node = open_list[0]
-        current_index = 0
         for index, item in enumerate(open_list):
             if item.f_score <= current_node.f_score:
                 current_node = item
-                current_index = index
-        open_list.pop(current_index)
+        open_list.remove(current_node)
         closed_list.append(current_node.id)
-        if current_node == end_node:
+        if current_node in end_nodes:
             return reconstruct_path(current_node, start_node)
         set_neighbors(grid, current_node)
-        check_neighbors(open_list, closed_list, current_node)
+        check_neighbors(open_list, closed_list, current_node, start_node, end_nodes)
     return None
 
 
@@ -102,31 +99,23 @@ def set_neighbors(grid, current_node):
             current_node.neighbors.append(neighbor)
 
 
-def check_neighbors(open_list, closed_list, current_node):
+def check_neighbors(open_list, closed_list, current_node, start_node, end_nodes):
     for neighbor in current_node.neighbors:
         if neighbor.id in closed_list:
             continue
-        neighbor.g_score = current_node.g_score + 1
-        neighbor.f_score = neighbor.g_score + crow(current_node, neighbor)
+        neighbor.g_score = current_node.g_score + distance(current_node, neighbor, start_node, end_nodes)
+        neighbor.f_score = neighbor.g_score + heuristic(current_node, neighbor, start_node, end_nodes)
         if (neighbor in open_list) and (neighbor.g_score > current_node.g_score):
             continue
         open_list.append(neighbor)
         neighbor.parent = current_node
 
 
-def distance(current_node, next_node):
-    if current_node.value < next_node.value:
-        return 1
-    else:
-        return (current_node.value - next_node.value) + 2
+def distance(current_node, next_node, start_node, end_nodes):
+    return 1
 
-
-def crow(current_node, next_node):
-    x1 = current_node.x
-    y1 = current_node.y
-    x2 = next_node.x
-    y2 = next_node.y
-    return abs(x1 - x2) + abs(y1 - y2)
+def heuristic(current_node, next_node, start_node, end_nodes):
+    return 0
 
 
 def reconstruct_path(current_node, starting_node):
@@ -140,26 +129,10 @@ def reconstruct_path(current_node, starting_node):
     return path[::-1]
 
 
-def find_a_nodes(grid):
-    a_list = []
-    for y in range(0, len(grid)):
-        for x in range(0, len(grid[y])):
-            node = grid[y][x]
-            if node.character == 'a':
-                a_list.append(node)
-    return a_list
-
-
 if __name__ == "__main__":
     full_grid, start, end = process_grid(True)
     final_results = a_star(full_grid, start, end)
     print(len(final_results) - 1)
 
-    list_of_as = find_a_nodes(full_grid)
-    a_results = []
-    for a_node in list_of_as:
-        result = a_star(full_grid, a_node, end)
-        if result is None:
-            continue
-        a_results.append(len(a_star(full_grid, a_node, end)) - 1)
-    print(min(a_results))
+    full_grid, start, end = process_grid(False)
+    print(len(a_star(full_grid, start, end)) - 1)
