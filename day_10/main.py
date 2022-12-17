@@ -15,6 +15,7 @@ class Command:
     name = None
 
     def execute(self, system):
+        # To be overwritten.
         pass
 
 
@@ -59,36 +60,19 @@ def process():
                     add_x_command = AddXCommand(int(amount))
                     system.commands_in_progress.append(add_x_command)
                     most_recent_command = add_x_command
-
-            if most_recent_command is not None:
-                for _ in range(0, most_recent_command.cycles_left):
-                    system.current_cycle += 1
-                    result = check_signal_strength(start_cycle, cycle_cadence, signal_strength_total, system)
-                    if result is not None:
-                        signal_strength_total = result
-                    row = system.current_cycle // 40
-                    possible_columns = [system.x_register - 1, system.x_register, system.x_register + 1]
-                    cycle_column = system.current_cycle - (row * 40)
-                    if cycle_column in possible_columns:
-                        display_array[row][cycle_column] = '#'
-                most_recent_command.execute(system)
+            for _ in range(0, most_recent_command.cycles_left):
+                system.current_cycle += 1
+                result = check_signal_strength(start_cycle, cycle_cadence, signal_strength_total, system)
+                if result is not None:
+                    signal_strength_total = result
+                row = system.current_cycle // 40
+                possible_columns = [system.x_register - 1, system.x_register, system.x_register + 1]
+                cycle_column = system.current_cycle - (row * 40)
+                if cycle_column in possible_columns:
+                    display_array[row][cycle_column] = '#'
+            most_recent_command.execute(system)
 
     return signal_strength_total, display_array
-
-
-# If the system had been in parallel - I would have liked part II to have been about that...
-# system.current_cycle += 1
-
-# recently_completed_commands = []
-# for in_progress in system.commands_in_progress:
-#     in_progress.cycles_left -= 1
-#     if in_progress.cycles_left == 0:
-#         in_progress.execute(system)
-#         system.completed_commands = in_progress
-#         recently_completed_commands.append(in_progress)
-
-# for recently_completed_command in recently_completed_commands:
-#     system.commands_in_progress.remove(recently_completed_command)
 
 
 def check_signal_strength(start_cycle, cycle_cadence, signal_strength_total, system):
