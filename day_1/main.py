@@ -40,5 +40,7 @@ def process_batch(max_bunching, curr_calories):
 # Execution of Day 1 of Advent of Code
 if __name__ == '__main__':
     max_bunching = find_max_elf_calories()
+    print("### PART ONE ###")
     print("Max For Any Given Elf: {}".format(max(max_bunching)))
+    print("### PART TWO ###")
     print("Total For Top Three Elves: {}".format(sum(max_bunching)))

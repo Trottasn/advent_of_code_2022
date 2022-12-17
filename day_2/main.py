@@ -118,6 +118,7 @@ if __name__ == '__main__':
     The score for a single round is the score for the shape you selected (1 for Rock, 2 for Paper, and 3 for Scissors) 
     plus the score for the outcome of the round (0 if you lost, 3 if the round was a draw, and 6 if you won).
     '''
-    # Execute
+    print("### PART ONE ###")
     print(calculate_total_points(False))
+    print("### PART TWO ###")
     print(calculate_total_points(True))

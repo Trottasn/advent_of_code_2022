@@ -33,5 +33,8 @@ def process_frame(current_index, current_frame):
 
 
 if __name__ == "__main__":
+    print("### PART ONE ###")
     find_unique_char_substrings(4)
+
+    print("### PART TWO ###")
     find_unique_char_substrings(14)

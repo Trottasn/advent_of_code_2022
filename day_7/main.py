@@ -107,11 +107,14 @@ def create_space_string(indent_count):
 
 
 if __name__ == "__main__":
+    print("### PART ONE ###")
     master_dir = process_file()
     dir_list = []
     sub_summation, total = display_filesystem(dir_list, master_dir, 1)
     print("total size: {}".format(total))
     print("total size of dirs UNDER 100000: {}".format(sub_summation))
+
+    print("### PART TWO ###")
     MAX_SYSTEM_SIZE = 70000000
     space_needed = abs(MAX_SYSTEM_SIZE - total - 30000000)
     print("space needed: {}".format(space_needed))

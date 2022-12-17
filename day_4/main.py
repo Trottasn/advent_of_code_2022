@@ -33,5 +33,8 @@ def count_overlap():
 
 # Execution of Day 4 of Advent of Code
 if __name__ == '__main__':
-    # Execute
-    print(count_overlap())
+    results = count_overlap()
+    print("### PART ONE ###")
+    print(results[0])
+    print("### PART TWO ###")
+    print(results[1])

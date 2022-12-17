@@ -34,25 +34,33 @@ def connect_grid_components(all_trees, grid):
         left_tree = (tree.column_number == 0)
         right_tree = (tree.column_number == (len(grid[tree.line_number]) - 1))
         if not left_tree:
-            tree.left = grid[tree.line_number][tree.column_number - 1]
-            if not top_tree:
-                tree.top_left = grid[tree.line_number - 1][tree.column_number - 1]
-            if not bottom_tree:
-                tree.bottom_left = grid[tree.line_number + 1][tree.column_number - 1]
-            tree.left_trees = get_all_trees_left_of_column(grid, tree.line_number, tree.column_number)
+            connect_left(grid, tree, top_tree, bottom_tree)
         if not right_tree:
-            tree.right = grid[tree.line_number][tree.column_number + 1]
-            if not top_tree:
-                tree.top_right = grid[tree.line_number - 1][tree.column_number + 1]
-            if not bottom_tree:
-                tree.bottom_right = grid[tree.line_number + 1][tree.column_number + 1]
-            tree.right_trees = get_all_trees_right_of_column(grid, tree.line_number, tree.column_number)
+            connect_right(grid, tree, top_tree, bottom_tree)
         if not top_tree:
             tree.top = grid[tree.line_number - 1][tree.column_number]
             tree.top_trees = get_all_trees_above_row(grid, tree.line_number, tree.column_number)
         if not bottom_tree:
             tree.bottom = grid[tree.line_number - 1][tree.column_number]
             tree.bottom_trees = get_all_trees_below_row(grid, tree.line_number, tree.column_number)
+
+
+def connect_left(grid, tree, top_tree, bottom_tree):
+    tree.left = grid[tree.line_number][tree.column_number - 1]
+    if not top_tree:
+        tree.top_left = grid[tree.line_number - 1][tree.column_number - 1]
+    if not bottom_tree:
+        tree.bottom_left = grid[tree.line_number + 1][tree.column_number - 1]
+    tree.left_trees = get_all_trees_left_of_column(grid, tree.line_number, tree.column_number)
+
+
+def connect_right(grid, tree, top_tree, bottom_tree):
+    tree.right = grid[tree.line_number][tree.column_number + 1]
+    if not top_tree:
+        tree.top_right = grid[tree.line_number - 1][tree.column_number + 1]
+    if not bottom_tree:
+        tree.bottom_right = grid[tree.line_number + 1][tree.column_number + 1]
+    tree.right_trees = get_all_trees_right_of_column(grid, tree.line_number, tree.column_number)
 
 
 def get_all_trees_left_of_column_full(grid, column_number):
@@ -163,5 +171,7 @@ if __name__ == "__main__":
     final_trees, final_grid = make_grid()
     connect_grid_components(final_trees, final_grid)
     total_visible_trees, best_view_score = get_total_visible(final_trees)
+    print("### PART ONE ###")
     print(total_visible_trees)
+    print("### PART TWO ###")
     print(best_view_score)

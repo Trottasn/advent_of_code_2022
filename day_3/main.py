@@ -52,21 +52,20 @@ def calculate_bag_sum():
             grouping.append(bag)
             compartment_match = bag.compartment1.find_match(bag.compartment2)
             priority = calculate_priority(compartment_match)
-            print("Compartment Match {}, Priority: {}".format(compartment_match, priority))
             total += priority
             if len(grouping) == 3:
                 grouping.sort(key=lambda curr_bag: len(curr_bag.contents))
                 group_match = grouping[0].find_bag_match(grouping[1], grouping[2])
                 priority = calculate_priority(group_match[0])
-                print("Group Match {}, Priority: {}".format(group_match, priority))
                 group_total += priority
                 grouping.clear()
-    print("Total Priority: {}".format(total))
-    print("Group Priority: {}".format(group_total))
-    return total
+    return total, group_total
 
 
 # Execution of Day 3 of Advent of Code
 if __name__ == '__main__':
-    # Execute
-    calculate_bag_sum()
+    final_total, final_group_total = calculate_bag_sum()
+    print("### PART ONE ###")
+    print(final_total)
+    print("### PART TWO ###")
+    print(final_group_total)

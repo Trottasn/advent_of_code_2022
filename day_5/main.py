@@ -1,4 +1,4 @@
-def create_layout():
+def create_layout(MODE):
     with open('input_day_5.txt') as input_file:
         box_lines = []
         box_mode = True
@@ -15,15 +15,14 @@ def create_layout():
                 if len(line) < 1:
                     continue
                 process_direction_line(directions, line)
-        execute_directions(column_box_map, directions)
+        execute_directions(column_box_map, directions, MODE)
 
 
-def execute_directions(column_box_map, directions):
+def execute_directions(column_box_map, directions, MODE):
     for key in column_box_map:
         column_string = ""
         for box in column_box_map[key]:
             column_string += box
-        print(column_string)
     for direction in directions:
         num_iters = int(direction[0])
         src_index = int(direction[1])
@@ -31,7 +30,10 @@ def execute_directions(column_box_map, directions):
         original_dst_len = len(column_box_map[dst_index])
         for _ in range(0, num_iters):
             character = column_box_map[src_index].pop()
-            column_box_map[dst_index].insert(original_dst_len, character)
+            if MODE == 1:
+                column_box_map[dst_index].insert(original_dst_len, character)
+            else:
+                column_box_map[dst_index].append(character)
     answer = ""
     for key in column_box_map:
         answer += str(column_box_map[key][-1])
@@ -85,4 +87,7 @@ def is_box_line(line):
 
 
 if __name__ == "__main__":
-    create_layout()
+    print("### PART ONE ###")
+    create_layout(2)
+    print("### PART TWO ###")
+    create_layout(1)

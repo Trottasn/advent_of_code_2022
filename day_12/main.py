@@ -114,6 +114,7 @@ def check_neighbors(open_list, closed_list, current_node, start_node, end_nodes)
 def distance(current_node, next_node, start_node, end_nodes):
     return 1
 
+
 def heuristic(current_node, next_node, start_node, end_nodes):
     return 0
 
