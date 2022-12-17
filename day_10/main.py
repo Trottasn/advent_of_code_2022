@@ -40,11 +40,7 @@ def process():
     start_cycle = 20
     cycle_cadence = 40
     signal_strength_total = 0
-    display_array = []
-    for x in range(0, 6):
-        display_array.append([])
-        for _ in range(0, 40):
-            display_array[x].append('.')
+    display_array = generate_display_array()
     with open("input_day_10.txt", mode='r') as input_file:
         for line in input_file:
             command = line.strip()
@@ -60,19 +56,34 @@ def process():
                     add_x_command = AddXCommand(int(amount))
                     system.commands_in_progress.append(add_x_command)
                     most_recent_command = add_x_command
-            for _ in range(0, most_recent_command.cycles_left):
-                system.current_cycle += 1
-                result = check_signal_strength(start_cycle, cycle_cadence, signal_strength_total, system)
-                if result is not None:
-                    signal_strength_total = result
-                row = system.current_cycle // 40
-                possible_columns = [system.x_register - 1, system.x_register, system.x_register + 1]
-                cycle_column = system.current_cycle - (row * 40)
-                if cycle_column in possible_columns:
-                    display_array[row][cycle_column] = '#'
-            most_recent_command.execute(system)
+            signal_strength_total = perform_cycle(display_array, system, most_recent_command, start_cycle,
+                                                  cycle_cadence, signal_strength_total)
 
     return signal_strength_total, display_array
+
+
+def perform_cycle(display_array, system, most_recent_command, start_cycle, cycle_cadence, signal_strength_total):
+    for _ in range(0, most_recent_command.cycles_left):
+        system.current_cycle += 1
+        result = check_signal_strength(start_cycle, cycle_cadence, signal_strength_total, system)
+        if result is not None:
+            signal_strength_total = result
+        row = system.current_cycle // 40
+        possible_columns = [system.x_register - 1, system.x_register, system.x_register + 1]
+        cycle_column = system.current_cycle - (row * 40)
+        if cycle_column in possible_columns:
+            display_array[row][cycle_column] = '#'
+    most_recent_command.execute(system)
+    return signal_strength_total
+
+
+def generate_display_array():
+    display_array = []
+    for row_index in range(0, 6):
+        display_array.append([])
+        for _ in range(0, 40):
+            display_array[row_index].append('.')
+    return display_array
 
 
 def check_signal_strength(start_cycle, cycle_cadence, signal_strength_total, system):
